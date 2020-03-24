@@ -101,7 +101,7 @@ Basic, implementation schema idea storm.
     + The program will check for all the combinations, storing the one with better score 
     + We will think about representation later
     + First implementation will be in python
-
+    + Check all the possible permutations, checking if it is possible 
 
 
 ## Other stuff
