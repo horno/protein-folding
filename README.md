@@ -1,12 +1,12 @@
+#PROTEIN FOLDING
+
 We can begin with a simplified version of the 2D HP model in the square lattice.
-- 2D: real proteins fold in 3D
-    Alternatives (3D):
+- 2D: real proteins fold in 3D. Alternatives (3D):
     - simple cubic lattice
     - body centered cubic lattice
     - face centered cubic lattice
 
-- Square lattice: real proteins also don't always fold in 90º angles 
-    Alternatives:
+- Square lattice: real proteins also don't always fold in 90º angles. Alternatives:
     - Triangular lattice
 
 This simplified model has only two types of aminoacids, H and P. H stands for 
@@ -42,12 +42,11 @@ the last) has 2 edge neighbors and 2 other neighbors.
 - The optimal folding has the maximum score
 - Considdering the string of molecules, only even and odd H's can possibly
 bond together, (because of the 2D squared lettuce).
-- OPT <= 2·min{#even H's, #odd H's}
-    Explanation:
-        -- Every bond defines an even and an odd 
-        -- Every even and odd can only get hit up to twice
-        -- If there is more even than odds its not going to help, as there is 
-        no way to use more even than odds (excludig first and last)
+- OPT <= 2·min{#even H's, #odd H's}. Explanation:
+        + Every bond defines an even and an odd 
+        + Every even and odd can only get hit up to twice
+        + If there is more even than odds its not going to help, as there is 
+        + way to use more even than odds (excludig first and last)
 
 
 ## Hardness
@@ -56,33 +55,33 @@ To find the optimal folding of a given HP string is NP-Hard. First it was proved
 that 3D HP was NP-Hard, later was proved that 2D also.
 
 
-[//]: # We are going to work out the estimate combinatory. To make it easy we won't be speaking
-[//]: # in terms of aminoacids, but in terms of slots of each aminoacid. Each aminoacid has 2
-[//]: # slots, so there are 2·k blanks to fill. In each blank we can put any other bound 
-[//]: # (remember, there are 2·k of them) plus 1, because we can leave a empty bound. Adding up
-[//]: # the previous premises, we have 2·k blanks to fill with 2·k+1 possible fillings. That is
-[//]: # the same as saying (2·k+1)^(2·k). Now let's work out with that number:
-[//]: #
-[//]: #    -- having a protein string of length k, we consider that all aminoacids could be H,
-[//]: #       that's why whe have the last k, in (2k+1)^(2k)
-[//]: #    
-[//]: #    -- One aminoacid can bound at maximum 2 times and at minimmum 0, thats why we have
-[//]: #       the 2 in (2k+1)^(2k)
-[//]: #
-[//]: #    -- If one aminoacid bounds, it can't be with itself, so the formula needs to be
-[//]: #       adjusted to (2k)^(2k) 
-[//]: #    
-[//]: #    -- If one aminoacid bounds two times, it has to be with different aminoacids, the
-[//]: #       formula we have now is (k)^(2k)
-[//]: #
-[//]: #    -- If a[1] is the aminoacid in position 1, a[1][0] and a[1][1] are their 
-[//]: #       left and right bound space, respectively. Nevertheless this is indferent, so 
-[//]: #       combinatory speaking we don't diferenciate left and right.
-[//]: #
-[//]: #    -- The bounds are symetrical, so if the aminoacid 4 is chained with the 9th, the 9th
-[//]: #       is also chained to the 4th. Having said that, not all the H can be paired, so we 
-[//]: #       can't get by permutating half of the chain, as we would be able to do otherwise
-    
+<!-- We are going to work out the estimate combinatory. To make it easy we won't be speaking
+in terms of aminoacids, but in terms of slots of each aminoacid. Each aminoacid has 2
+slots, so there are 2·k blanks to fill. In each blank we can put any other bound 
+(remember, there are 2·k of them) plus 1, because we can leave a empty bound. Adding up
+the previous premises, we have 2·k blanks to fill with 2·k+1 possible fillings. That is
+the same as saying (2·k+1)^(2·k). Now let's work out with that number:
+
+   - having a protein string of length k, we consider that all aminoacids could be H,
+      that's why whe have the last k, in (2k+1)^(2k)
+   
+   - One aminoacid can bound at maximum 2 times and at minimmum 0, thats why we have
+      the 2 in (2k+1)^(2k)
+
+   - If one aminoacid bounds, it can't be with itself, so the formula needs to be
+      adjusted to (2k)^(2k) 
+   
+   - If one aminoacid bounds two times, it has to be with different aminoacids, the
+      formula we have now is (k)^(2k)
+
+   - If a[1] is the aminoacid in position 1, a[1][0] and a[1][1] are their 
+      left and right bound space, respectively. Nevertheless this is indferent, so 
+      combinatory speaking we don't diferenciate left and right.
+
+   - The bounds are symetrical, so if the aminoacid 4 is chained with the 9th, the 9th
+      is also chained to the 4th. Having said that, not all the H can be paired, so we 
+      can't get by permutating half of the chain, as we would be able to do otherwise
+-->
     
 
 
@@ -96,13 +95,12 @@ the chance of finding relatively quickli a 1/3 of the OPT is high.
 ## Implementation schema
 Basic, implementation schema idea storm.
 - Iteration 0.1
-    -- A file stores a secuence of H and P letters and other parametters
-    -- Seed parametter, to be able to track random walks
-    -- Maximum number of steps, in order not to get stuck searching the optimum
-    -- The program will check for all the combinations, storing the one with better
-       score 
-    -- We will think about representation later
-    -- First implementation will be in python
+    + A file stores a secuence of H and P letters and other parametters
+    + Seed parametter, to be able to track random walks
+    + Maximum number of steps, in order not to get stuck searching the optimum
+    + The program will check for all the combinations, storing the one with better score 
+    + We will think about representation later
+    + First implementation will be in python
 
 
 
