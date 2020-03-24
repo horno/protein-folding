@@ -56,32 +56,32 @@ To find the optimal folding of a given HP string is NP-Hard. First it was proved
 that 3D HP was NP-Hard, later was proved that 2D also.
 
 
-We are going to work out the estimate combinatory. To make it easy we won't be speaking
-in terms of aminoacids, but in terms of slots of each aminoacid. Each aminoacid has 2
-slots, so there are 2·k blanks to fill. In each blank we can put any other bound 
-(remember, there are 2·k of them) plus 1, because we can leave a empty bound. Adding up
-the previous premises, we have 2·k blanks to fill with 2·k+1 possible fillings. That is
-the same as saying (2·k+1)^(2·k). Now let's work out with that number:
-
-    -- having a protein string of length k, we consider that all aminoacids could be H,
-       that's why whe have the last k, in (2k+1)^(2k)
-    
-    -- One aminoacid can bound at maximum 2 times and at minimmum 0, thats why we have
-       the 2 in (2k+1)^(2k)
-
-    -- If one aminoacid bounds, it can't be with itself, so the formula needs to be
-       adjusted to (2k)^(2k) 
-    
-    -- If one aminoacid bounds two times, it has to be with different aminoacids, the
-       formula we have now is (k)^(2k)
-
-    -- If a[1] is the aminoacid in position 1, a[1][0] and a[1][1] are their 
-       left and right bound space, respectively. Nevertheless this is indferent, so 
-       combinatory speaking we don't diferenciate left and right.
-
-    -- The bounds are symetrical, so if the aminoacid 4 is chained with the 9th, the 9th
-       is also chained to the 4th. Having said that, not all the H can be paired, so we 
-       can't get by permutating half of the chain, as we would be able to do otherwise
+[//]: # We are going to work out the estimate combinatory. To make it easy we won't be speaking
+[//]: # in terms of aminoacids, but in terms of slots of each aminoacid. Each aminoacid has 2
+[//]: # slots, so there are 2·k blanks to fill. In each blank we can put any other bound 
+[//]: # (remember, there are 2·k of them) plus 1, because we can leave a empty bound. Adding up
+[//]: # the previous premises, we have 2·k blanks to fill with 2·k+1 possible fillings. That is
+[//]: # the same as saying (2·k+1)^(2·k). Now let's work out with that number:
+[//]: #
+[//]: #    -- having a protein string of length k, we consider that all aminoacids could be H,
+[//]: #       that's why whe have the last k, in (2k+1)^(2k)
+[//]: #    
+[//]: #    -- One aminoacid can bound at maximum 2 times and at minimmum 0, thats why we have
+[//]: #       the 2 in (2k+1)^(2k)
+[//]: #
+[//]: #    -- If one aminoacid bounds, it can't be with itself, so the formula needs to be
+[//]: #       adjusted to (2k)^(2k) 
+[//]: #    
+[//]: #    -- If one aminoacid bounds two times, it has to be with different aminoacids, the
+[//]: #       formula we have now is (k)^(2k)
+[//]: #
+[//]: #    -- If a[1] is the aminoacid in position 1, a[1][0] and a[1][1] are their 
+[//]: #       left and right bound space, respectively. Nevertheless this is indferent, so 
+[//]: #       combinatory speaking we don't diferenciate left and right.
+[//]: #
+[//]: #    -- The bounds are symetrical, so if the aminoacid 4 is chained with the 9th, the 9th
+[//]: #       is also chained to the 4th. Having said that, not all the H can be paired, so we 
+[//]: #       can't get by permutating half of the chain, as we would be able to do otherwise
     
     
 
