@@ -1,4 +1,4 @@
-#PROTEIN FOLDING
+# PROTEIN FOLDING
 
 We can begin with a simplified version of the 2D HP model in the square lattice.
 - 2D: real proteins fold in 3D. Alternatives (3D):
