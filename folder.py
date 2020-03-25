@@ -1,6 +1,9 @@
 #!/bin/env python3
 from configparser import ConfigParser
+import copy
+import sys
 
+folded = 0
 
 def read_config_file_configparser(file_path):
     config_object = ConfigParser()
@@ -28,7 +31,7 @@ def score(protein_string):
 def parse_protein(protein_string):
     protein_struct = []
     protein_struct.append(['X','X'])
-    for i in range(1,len(protein_string)):
+    for i in range(len(protein_string)):
         protein_struct.append([protein_string[i],''])
     protein_struct.append([protein_string[i],'X'])
     return protein_struct
@@ -65,22 +68,31 @@ def is_protein_valid(protein):
     return not is_cardinal_repeated(cardinals)
 
 
-def fold_rec(protein, depth, length):
+def fold_rec(protein, depth, length, p=0, fold_max=0):
     orients = ['N','S','E','W']
     proteins =  []
+    global folded
+    if fold_max != 0 and folded >= fold_max:
+        return proteins
     if depth == length-1:
         if is_protein_valid(protein):
+            if p == 1:
+                draw_protein(protein)
+            folded += 1
             proteins.append(protein)
         return proteins
     for symbol in orients:
-        protein[depth][1] = symbol 
-        new_folds =  fold_rec(protein, depth + 1, length)
+        new_prot = copy.deepcopy(protein)
+        new_prot[depth][1] = symbol 
+        new_folds =  fold_rec(new_prot,depth+1,length,p,fold_max)
         for prot in new_folds:
             proteins.append(prot)
     return proteins
 
+def fold_along(protein, fold_max=0):
+    fold_rec(protein, 1, len(protein), 1,fold_max)
 
-def fold(protein):
+def fold(protein, fold_max = 0):
     proteins = fold_rec(protein, 1, len(protein))
     return proteins
 
@@ -122,29 +134,72 @@ def print_grid(grid):
             print(col, end="")
         print()
 
-def draw_protein(protein):
+def create_base_grid(cardinals, length):
     grid = []
-    cardinals = cardinalize(protein)[1:]
-    normalized_card = normalize_cardinals(cardinals)
-    for i in range(len(protein)*2):
+    for i in range(length):
         row = []
-        for j in range(len(protein)*2):
-            row.append("X ")
+        for j in range(length):
+            row.append(" ")
         grid.append(row)
+    return grid
 
+def card_offset_f_orientation(orientation):
+    if orientation == 'N':
+        offset = (0,1)
+        padding_char = '|'
+    elif orientation == 'S':
+        offset = (0,-1)
+        padding_char = '|'
+    elif orientation == 'E':
+        offset = (1,0)
+        padding_char = '-'
+    else:
+        offset = (-1,0)
+        padding_char = '-'
+    return offset, padding_char
+
+def insert_protein_in_grid(grid, protein, cardinals):
+    for i in range(1, len(protein)):
+        bond_orientation = protein[i][1]
+        x = cardinals[i][0]*2
+        y = cardinals[i][1]*2
+        grid[y][x] = protein[i][0]
+        if bond_orientation != 'X':
+            offset, padding_char =\
+                    card_offset_f_orientation(bond_orientation)
+            grid[y+offset[1]][x+offset[0]] = padding_char
+    return grid
+
+def draw_protein(protein):
+    cardinals = cardinalize(protein)
+    normalized_card = normalize_cardinals(cardinals)
+    grid = create_base_grid(normalized_card, len(protein)*2)
+    grid = insert_protein_in_grid(grid, protein, normalized_card)
     print_grid(grid)
-    
-def main():
+
+def get_initial_protein():
     steps, seed, protein_string = \
             read_config_file_configparser("params.conf")
-    print("Input:")
-    print(steps, seed, protein_string)
-    protein_struct = parse_protein(protein_string)
+    return parse_protein(protein_string)
+
+def main_fold_x_times():
+    times = 10
+    if len(sys.argv) == 2:
+        times = int(sys.argv[1])
+
+    protein_struct = get_initial_protein() 
+    proteins = fold_along(protein_struct,times)
+    
+def main():
+    protein_struct = get_initial_protein() 
     print_protein(protein_struct)
     proteins = fold(protein_struct)
-    draw_protein(proteins[0])
+    for i in range(len(proteins)):
+        draw_protein(proteins[i])
 
 
 if __name__=="__main__":
-    main()
+    #main()
+    main_fold_x_times()
+
 
