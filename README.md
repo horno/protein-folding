@@ -101,7 +101,15 @@ Basic, implementation schema idea storm.
     + The program will check for all the combinations, storing the one with better score 
     + We will think about representation later
     + First implementation will be in python
-    + Check all the possible permutations, checking if it is possible 
+- Iteration 0.2
+    + Iteration 0.1 almost completed. Jumping to 0.2
+    + Fix different usages with arguments
+    + It will have a benchmark mode, this mode will give the time that has taken to make
+   a given number of folds. To make the bench more even, the number of folds and the protein
+   will be given.
+
+## Use
+:
 
 
 ## Other stuff
