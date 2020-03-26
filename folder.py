@@ -1,23 +1,23 @@
 #!/bin/env python3
 from configparser import ConfigParser
 import getopt, sys
+import cProfile
 import copy
 
 folded = 0
-
 
 def score(protein):
     cardinals = cardinalize(protein)
     h_protein, h_cardinals = destroy_polar_aminoacids(protein)
     score = 0
     for cardinal in h_cardinals:
-        all_neighbors = neigbors(cardinal[0], cardinal[1])
+        all_neighbors = neighbors(cardinal[0], cardinal[1])
         for neighbor in all_neighbors:
             if neighbor in h_cardinals:
                 score += 1
     return score/2
 
-def neigbors(x,y):
+def neighbors(x,y):
     return (x+1,y),(x-1,y),(x,y+1),(x,y-1)
 
 def destroy_polar_aminoacids(current_protein):
@@ -67,6 +67,12 @@ def is_cardinal_repeated(cardinals):
     return False
 
 def is_protein_valid(protein):
+    #permutation = ""
+    #for i in range(1,len(protein)-1):
+    #    permutation += protein[i][1]
+    #    #print(protein[i])
+    #print(permutation)
+        
     cardinals = cardinalize(protein)[1:]
     return not is_cardinal_repeated(cardinals)
 
@@ -81,14 +87,13 @@ def fold_rec(protein, depth, length, hide, max_folds):
             if hide == False:
                 draw_protein(protein)
             folded += 1
-            return score(protein), protein
+            return score(protein), copy.deepcopy(protein)
         return 0,[]
     best_score = -1
     best_protein = None
     for symbol in orients:
-        new_prot = copy.deepcopy(protein)
-        new_prot[depth][1] = symbol 
-        new_fold =  fold_rec(new_prot,depth+1,\
+        protein[depth][1] = symbol 
+        new_fold =  fold_rec(protein,depth+1,\
                 length,hide,max_folds)
         if new_fold[0] > best_score:
             best_score = new_fold[0]
@@ -212,7 +217,7 @@ def parse_arguments():
             hide = True
     return bench, hide, max_folds, protein_string
 
-def handle_parametters():
+def handle_parameters():
     bench, hide, max_folds, protein_string = parse_arguments()
     max_folds_conf, seed,  protein_string_conf = read_config_file("params.conf") 
     if max_folds == 0:
@@ -235,15 +240,23 @@ def read_config_file(file_path):
     protein_string = protein["string"]
     return int(max_folds), seed, protein_string
 
+def profile(hide):
+    max_folds = 10000
+    protein_string_complex = "HPHPPHPHPHHHPH"
+    protein_string_simple = "HPHPHH"
+    
+    protein = parse_protein(protein_string_complex)
+    fold(protein, max_folds, hide)
+
 def main():
-    bench, hide, seed, max_folds, protein = handle_parametters()
+    bench, hide, seed, max_folds, protein = handle_parameters()
     if bench == True:
-        max_folds = 10000
-        protein_string = "HPHPPHPHPHHHPH"
-        protein_string = "HPHHPPH"
-        protein =  parse_protein(protein_string)
-        fold(protein, max_folds, hide)
-        return
+        if hide:
+            cProfile.run("profile( True )")
+        else:
+            cProfile.run("profile( True )")
+        sys.exit(0)
+
     best_fold = fold(protein, max_folds, hide)
     protein = best_fold[1]
     score = best_fold[0]

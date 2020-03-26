@@ -109,7 +109,11 @@ Basic, implementation schema idea storm.
    will be given.
 
 ## Use
-:
+- TODO: Write use and --help in fold.py
+
+## Folding program annotations
+- There are a lot of symetries easily avoidables. Check out if half of them 
+(only up to k/2+1) are necessary, it could be a massive improvement
 
 
 ## Other stuff
