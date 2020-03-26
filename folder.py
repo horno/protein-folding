@@ -57,14 +57,13 @@ def cardinalize(protein):
     return cardinals
 
 def is_cardinal_repeated(cardinals):
-    for cardinal_1 in cardinals:
-        add = 0
-        for cardinal_2 in cardinals:
-            if cardinal_1 == cardinal_2:
-                add += 1
-            if add > 1:
-                return True
+    seen = set()
+    for i in cardinals:
+        if i in seen:
+            return True
+        seen.add(i)
     return False
+
 
 def is_protein_valid(protein):
     #permutation = ""
@@ -241,8 +240,8 @@ def read_config_file(file_path):
     return int(max_folds), seed, protein_string
 
 def profile(hide):
-    max_folds = 10000
-    protein_string_complex = "HPHPPHPHPHHHPH"
+    max_folds = 30000
+    protein_string_complex = "HPHPHHPHPHHPPHHPHPH"
     protein_string_simple = "HPHPHH"
     
     protein = parse_protein(protein_string_complex)
@@ -254,7 +253,7 @@ def main():
         if hide:
             cProfile.run("profile( True )")
         else:
-            cProfile.run("profile( True )")
+            cProfile.run("profile( False )")
         sys.exit(0)
 
     best_fold = fold(protein, max_folds, hide)

@@ -131,3 +131,9 @@ needed a process that can take a lot of research, money and time. To
 throw some light, it is needed to cristalise a proteine (wich can take
 years of research). From that you get one 3D image that is collected in
 a protein data bank. 
+
+
+
+## TMP
+correct output protein string
+HPHHPHHPPHHH
