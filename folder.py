@@ -184,8 +184,6 @@ def draw_protein(protein):
     grid = insert_protein_in_grid(grid, protein, normalized_card)
     print_grid(grid)
 
-
-
 def parse_arguments():
     argument_list = sys.argv[1:]
     short_options = "hbf:p:n"
