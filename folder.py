@@ -1,7 +1,6 @@
 #!/bin/env python3
 from configparser import ConfigParser
 import getopt, sys
-import timeit
 import copy
 
 folded = 0
@@ -12,8 +11,6 @@ def score(protein):
     h_protein, h_cardinals = destroy_polar_aminoacids(protein)
     score = 0
     for cardinal in h_cardinals:
-        #x = cardinal[0]
-        #y = cardinal[1]
         all_neighbors = neigbors(cardinal[0], cardinal[1])
         for neighbor in all_neighbors:
             if neighbor in h_cardinals:
@@ -78,14 +75,15 @@ def fold_rec(protein, depth, length, hide, max_folds):
     orients = ['N','S','E','W']
     global folded
     if max_folds != 0 and folded >= max_folds:
-        return None
+        return 0,[]
     if depth == length-1:
         if is_protein_valid(protein):
             if hide == False:
                 draw_protein(protein)
             folded += 1
-        return score(protein), protein
-    best_score = 0
+            return score(protein), protein
+        return 0,[]
+    best_score = -1
     best_protein = None
     for symbol in orients:
         new_prot = copy.deepcopy(protein)
@@ -240,6 +238,10 @@ def read_config_file(file_path):
 def main():
     bench, hide, seed, max_folds, protein = handle_parametters()
     if bench == True:
+        max_folds = 10000
+        protein_string = "HPHPPHPHPHHHPH"
+        protein_string = "HPHHPPH"
+        protein =  parse_protein(protein_string)
         fold(protein, max_folds, hide)
         return
     best_fold = fold(protein, max_folds, hide)
@@ -248,32 +250,6 @@ def main():
     draw_protein(protein)
     print("Score",score)
 
-
-    #len_proteins = len(proteins)
-    #max_iterations = 20
-    #offset = 100
-    #if max_iterations > len_proteins:
-    #    max_iterations = len_proteins
-
-    #for i in range(offset, offset+max_iterations):
-    #    print_protein(proteins[i])
-    #    draw_protein(proteins[i])
-    #    p_score = score(proteins[i])
-    #    print(str(p_score))
-    #    print("\n --------------------- \n")
-
-
-    #best_score = 0
-    #best_protein = None
-    #for i in range(max_iterations):
-    #    p_score = score(proteins[i])
-    #    if p_score >= best_score:
-    #        best_protein = proteins[i]
-    #        best_score = p_score
-
-    #print_protein(best_protein)
-    #draw_protein(best_protein)
-    #print("Score:",str(best_score))
 
 if __name__=="__main__":
     main()
