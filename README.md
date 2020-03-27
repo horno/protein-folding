@@ -107,6 +107,10 @@ Basic, implementation schema idea storm.
     + It will have a benchmark mode, this mode will give the time that has taken to make
    a given number of folds. To make the bench more even, the number of folds and the protein
    will be given.
+- Iteration 1
+    + Iteration 1 reached. Functional and it begins to be not that slow
+    + There is a lot of symetry to study and filter, probably a +60% faster    
+   searching for the absolute solution 
 
 ## Use
 - TODO: Write use and --help in fold.py
