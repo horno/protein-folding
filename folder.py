@@ -4,6 +4,7 @@ import getopt, sys
 import cProfile
 import copy
 
+orients = ['N','S','E','W']
 folded = 0
 
 def score(protein):
@@ -33,10 +34,11 @@ def destroy_polar_aminoacids(current_protein):
             
 def parse_protein(protein_string):
     protein_struct = []
-    protein_struct.append(['X','X'])
-    for i in range(len(protein_string)-1):
-        protein_struct.append([protein_string[i],''])
-    protein_struct.append([protein_string[i+1],'X'])
+    protein_struct.append(['X','X',['x','x']])
+    protein_struct.append([protein_string[0],'',[0,0]])
+    for i in range(1,len(protein_string)-1):
+        protein_struct.append([protein_string[i],'',['x','x']])
+    protein_struct.append([protein_string[i+1],'X',['x','x']])
     return protein_struct
 
 def cardinalize(protein):
@@ -56,57 +58,69 @@ def cardinalize(protein):
         cardinals.append(new_cards)
     return cardinals
 
-def is_cardinal_repeated(cardinals):
-    seen = set()
-    for i in cardinals:
-        if i in seen:
-            return True
-        seen.add(i)
-    return False
-
-
 def is_protein_valid(protein):
-    #permutation = ""
-    #for i in range(1,len(protein)-1):
-    #    permutation += protein[i][1]
-    #    #print(protein[i])
-    #print(permutation)
-        
-    cardinals = cardinalize(protein)[1:]
-    return not is_cardinal_repeated(cardinals)
+    seen = set()
+    for i in range(1, len(protein)):
+        x = protein[i][2][0]
+        y = protein[i][2][1]
+        cardinal = (x,y)
+        if cardinal in seen:
+            return False
+        seen.add(cardinal)
+    return True
 
+def check_new_fold(new_fold, best_score, best_protein):
+    if new_fold[0] > best_score:
+        best_score = new_fold[0]
+        best_protein = new_fold[1]
+    return best_score, best_protein
 
-def fold_rec(protein, depth, length, hide, max_folds):
-    orients = ['N','S','E','W']
+def complete_protein(protein, hide, best_score):
     global folded
+    if is_protein_valid(protein):
+        if hide == False:
+            draw_protein(protein)
+        folded += 1
+        current_score = score(protein)
+        if current_score >= best_score:
+            return score(protein), copy.deepcopy(protein)
+    return 0,[]
+
+def partial_protein(protein, symbol, depth, length, hide, max_folds,\
+                                                best_score, best_protein):
+    protein[depth][1] = symbol
+    offset,_ = card_offset_f_orientation(symbol)
+    protein[depth+1][2][0] = protein[depth][2][0]+offset[0]
+    protein[depth+1][2][1] = protein[depth][2][1]+offset[1]
+    if is_protein_valid(protein[:depth+1]):
+        new_fold =  fold_rec(protein,depth+1,\
+                length,hide,max_folds, best_score)
+        return check_new_fold(new_fold,best_score,best_protein)
+    return 0,[]
+
+def fold_rec(protein, depth, length, hide, max_folds, best_score=-1):
+    global orients
     if max_folds != 0 and folded >= max_folds:
         return 0,[]
     if depth == length-1:
-        if is_protein_valid(protein):
-            if hide == False:
-                draw_protein(protein)
-            folded += 1
-            return score(protein), copy.deepcopy(protein)
-        return 0,[]
-    best_score = -1
+        score,new_protein = complete_protein(protein, hide, best_score)
+        return score, new_protein
     best_protein = None
     for symbol in orients:
-        protein[depth][1] = symbol 
-        new_fold =  fold_rec(protein,depth+1,\
-                length,hide,max_folds)
-        if new_fold[0] > best_score:
-            best_score = new_fold[0]
-            best_protein = new_fold[1] 
-
+        best_score, best_protein = partial_protein(protein, symbol, depth, \
+                            length, hide, max_folds, best_score, best_protein)
     return best_score, best_protein
+
 
 def fold(protein, max_folds, hide):
     best_fold = fold_rec(protein, 1, len(protein), hide, max_folds)
     return best_fold 
 
 def print_protein(protein):
+    protein = protein[1:]
     for i, aminoacid in enumerate(protein):
-        print(i, aminoacid)
+        print(i, aminoacid[0], aminoacid[1],
+              "("+str(aminoacid[2][0])+","+str(aminoacid[2][1])+")")
     print()
 
 def normalize_cardinals(cardinals):
@@ -221,8 +235,8 @@ def handle_parameters():
         max_folds = max_folds_conf
     if protein_string == "":
         protein_string = protein_string_conf
-    if len(protein_string) < 2:
-        print("Protein must have at least 2 aminoacids")
+    if len(protein_string) < 3:
+        print("Protein must have at least 3 aminoacids")
         sys.exit(-1)
     protein = parse_protein(protein_string)
     return bench, hide, seed, max_folds, protein
@@ -238,7 +252,7 @@ def read_config_file(file_path):
     return int(max_folds), seed, protein_string
 
 def profile(hide):
-    max_folds = 30000
+    max_folds = 350000
     protein_string_complex = "HPHPHHPHPHHPPHHPHPH"
     protein_string_simple = "HPHPHH"
     
