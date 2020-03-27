@@ -112,8 +112,10 @@ Basic, implementation schema idea storm.
     + There is a lot of symetry to study and filter, probably a +60% faster    
    searching for the absolute solution 
 
-## Use
-- TODO: Write use and --help in fold.py
+## TODOS
+- TODO: Write use in README and --help in fold.py
+- Fix vertical excess padding when drawing
+
 
 ## Folding program annotations
 - There are a lot of symetries easily avoidables. Check out if half of them 
