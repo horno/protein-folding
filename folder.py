@@ -8,30 +8,21 @@ orients = ['N','S','E','W']
 folded = 0
 
 def score(protein):
-    cardinals = cardinalize(protein)
-    h_protein, h_cardinals = destroy_polar_aminoacids(protein)
+    seen = set()
     score = 0
-    for cardinal in h_cardinals:
-        all_neighbors = neighbors(cardinal[0], cardinal[1])
-        for neighbor in all_neighbors:
-            if neighbor in h_cardinals:
-                score += 1
-    return score/2
+    for i in range(1, len(protein)):
+        amino = protein[i]
+        cardinal = (amino[2][0], amino[2][1])
+        if amino[0] == "H":
+            x = cardinal[0]
+            y = cardinal[1]
+            all_neighbors = [(x+1,y), (x-1,y), (x,y+1), (x,y-1)]
+            for neighbor in all_neighbors:
+                if neighbor in seen:
+                    score += 1
+            seen.add(cardinal)
+    return score
 
-def neighbors(x,y):
-    return (x+1,y),(x-1,y),(x,y+1),(x,y-1)
-
-def destroy_polar_aminoacids(current_protein):
-    current_cardinals = cardinalize(current_protein)
-    new_cardinals = []
-    new_protein =  []
-    for i, aminoacid in enumerate(current_protein):
-        if aminoacid[0] == 'H':
-            new_protein.append((copy.copy(aminoacid)))
-            new_cardinals.append(copy.copy(current_cardinals[i]))
-    return new_protein, new_cardinals
-        
-            
 def parse_protein(protein_string):
     protein_struct = []
     protein_struct.append(['X','X',['x','x']])
@@ -78,37 +69,65 @@ def check_new_fold(new_fold, best_score, best_protein):
 def complete_protein(protein, hide, best_score):
     global folded
     if is_protein_valid(protein):
-        if hide == False:
+        if hide == 0:
             draw_protein(protein)
         folded += 1
         current_score = score(protein)
-        if current_score >= best_score:
-            return score(protein), copy.deepcopy(protein)
+        if current_score > best_score:
+            if hide == 1:
+                draw_protein(protein)
+                print("Score:",str(current_score)+"\n")
+            return current_score, copy.deepcopy(protein)
     return 0,[]
 
-def partial_protein(protein, symbol, depth, length, hide, max_folds,\
+def oposite(orientation):
+    if orientation == "N":
+        return "S"
+    if orientation == "S":
+        return "N"
+    if orientation == "E":
+        return "W"
+    if orientation == "W":
+        return "E"
+
+def symbol_preprocess_check(protein, symbol, depth):
+    symbol_oposite = oposite(symbol)
+    if symbol_oposite  == protein[depth-1][1]:
+        return False
+    if depth > 3:
+        a = protein[depth-1][1]
+        b = protein[depth-2][1]
+        c = protein[depth-3][1]
+        if symbol_oposite == b and oposite(a) == c:
+            return False
+
+    return True
+
+def partial_protein(protein, depth, length, hide, max_folds,\
                                                 best_score, best_protein):
-    protein[depth][1] = symbol
-    offset,_ = card_offset_f_orientation(symbol)
-    protein[depth+1][2][0] = protein[depth][2][0]+offset[0]
-    protein[depth+1][2][1] = protein[depth][2][1]+offset[1]
-    if is_protein_valid(protein[:depth+1]):
-        new_fold =  fold_rec(protein,depth+1,\
-                length,hide,max_folds, best_score)
-        return check_new_fold(new_fold,best_score,best_protein)
-    return 0,[]
-
-def fold_rec(protein, depth, length, hide, max_folds, best_score=-1):
     global orients
+    for symbol in orients: 
+        if symbol_preprocess_check(protein, symbol, depth):
+            protein[depth][1] = symbol
+            offset = card_offset(symbol) # Improvement here
+            protein[depth+1][2][0] = protein[depth][2][0]+offset[0]
+            protein[depth+1][2][1] = protein[depth][2][1]+offset[1]
+            if is_protein_valid(protein[:depth+1]):
+                new_fold =  fold_rec(protein,depth+1,\
+                        length,hide,max_folds, best_score)
+                best_score, best_protein =  check_new_fold(new_fold,best_score,\
+                                                           best_protein)
+    return best_score, best_protein
+    
+def fold_rec(protein, depth, length, hide, max_folds, best_score=-1):
     if max_folds != 0 and folded >= max_folds:
         return 0,[]
     if depth == length-1:
         score,new_protein = complete_protein(protein, hide, best_score)
         return score, new_protein
     best_protein = None
-    for symbol in orients:
-        best_score, best_protein = partial_protein(protein, symbol, depth, \
-                            length, hide, max_folds, best_score, best_protein)
+    best_score, best_protein = partial_protein(protein, depth, \
+                        length, hide, max_folds, best_score, best_protein)
     return best_score, best_protein
 
 
@@ -164,6 +183,19 @@ def create_base_grid(cardinals, length):
         grid.append(row)
     return grid
 
+def card_offset(orientation):
+    if orientation == 'N':
+        offset = (0,1)
+    elif orientation == 'S':
+        offset = (0,-1)
+    elif orientation == 'E':
+        offset = (1,0)
+    else:
+        offset = (-1,0)
+    return offset
+
+
+
 def card_offset_f_orientation(orientation):
     if orientation == 'N':
         offset = (0,1)
@@ -202,12 +234,15 @@ def parse_arguments():
     argument_list = sys.argv[1:]
     short_options = "hbf:p:n"
     long_options = ["help","bench","max_folds=",\
-            "protein="]
+            "protein=", "best"]
     help_text = "You asked for help?"
     bench = False
     max_folds = 0
     protein_string = ""
-    hide = False
+    hide = 0
+    # 0 show all
+    # 1 show if one better pops up
+    # 2 show better of all
     try:
         arguments, value = getopt.getopt(argument_list, short_options,\
                                          long_options)
@@ -224,8 +259,11 @@ def parse_arguments():
             max_folds = int(current_val[1:])
         if current_arg in ("-p","--protein"):
             protein_string = current_val[1:]
-        if current_arg in ("-n","--not_show"):
-            hide = True
+        if current_arg in ("-n","--not_show","--best"):
+            hide = 2
+            if current_arg == "--best":
+                hide = 1
+            
     return bench, hide, max_folds, protein_string
 
 def handle_parameters():
@@ -262,10 +300,12 @@ def profile(hide):
 def main():
     bench, hide, seed, max_folds, protein = handle_parameters()
     if bench == True:
-        if hide:
-            cProfile.run("profile( True )")
+        if hide == 0:
+            cProfile.run("profile( 0 )")
+        elif hide == 1:
+            cProfile.run("profile( 1 )")
         else:
-            cProfile.run("profile( False )")
+            cProfile.run("profile( 2 )")
         sys.exit(0)
 
     best_fold = fold(protein, max_folds, hide)
