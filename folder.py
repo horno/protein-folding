@@ -3,25 +3,62 @@ from configparser import ConfigParser
 import getopt, sys
 import cProfile
 import copy
+import pyximport; pyximport.install()
 
 orients = ['N','S','E','W']
 folded = 0
 
 def score(protein):
-    seen = set()
+    h_amino = set()
+    all_amino = set()
     score = 0
     for i in range(1, len(protein)):
         amino = protein[i]
         cardinal = (amino[2][0], amino[2][1])
+        all_amino.add(cardinal)
         if amino[0] == "H":
             x = cardinal[0]
             y = cardinal[1]
             all_neighbors = [(x+1,y), (x-1,y), (x,y+1), (x,y-1)]
-            for neighbor in all_neighbors:
-                if neighbor in seen:
+            for neighbor in all_neighbors:   
+                if neighbor in h_amino:
                     score += 1
-            seen.add(cardinal)
+            h_amino.add(cardinal)
+    for i in range(1, len(protein)):
+        amino = protein[i]
+        cardinal = (amino[2][0], amino[2][1])
+        x = cardinal[0]
+        y = cardinal[1]
+        all_neighbors = [(x+1,y), (x-1,y), (x,y+1), (x,y-1)]
+        for neighbor in all_neighbors:
+            if neighbor in all_amino:
+                score += 1
+        
     return score
+
+    def score1(protein):
+        set_h = set()
+        score = 0
+        for i in range(1, len(protein)):
+            amino = protein[i]
+            if amino[0] == "H":
+                cardinal = (amino[2][0], amino[2][1])
+            set_h.add(cardinal)
+                
+    for i in range(1, len(protein)):
+        amino = protein[i]
+        if amino[0] == "H":
+            cardinal = (amino[2][0], amino[2][1])
+            x = cardinal[0]
+            y = cardinal[1]
+            all_neighbors = [(x+1,y), (x-1,y), (x,y+1), (x,y-1)]
+            for neighbor in all_neighbors:
+                if neighbor in set_h:
+                    score += 1
+    return score
+                
+
+
 
 def parse_protein(protein_string):
     protein_struct = []
@@ -171,7 +208,8 @@ def normalize_cardinals(cardinals):
 def print_grid(grid):
     for row in grid:
         for col in row:
-            print(col, end="")
+            #print(col, end="")
+            sys.stdout.write(col)
         print()
 
 def create_base_grid(cardinals, length):
@@ -290,7 +328,7 @@ def read_config_file(file_path):
     return int(max_folds), seed, protein_string
 
 def profile(hide):
-    max_folds = 350000
+    max_folds = 1000000
     protein_string_complex = "HPHPHHPHPHHPPHHPHPH"
     protein_string_simple = "HPHPHH"
     
